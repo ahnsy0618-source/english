@@ -352,26 +352,6 @@ html, body {
 }
 .auth-card__logo { font-size: 36px; margin: 0 0 8px; }
 .auth-card__title { font-size: 20px; font-weight: 700; margin: 0 0 24px; color: var(--ink); }
-.auth-tabs {
-  display: flex;
-  background: var(--bg-item);
-  border-radius: var(--radius-pill);
-  padding: 4px;
-  margin-bottom: 20px;
-}
-.auth-tab {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 9px 0;
-  border-radius: var(--radius-pill);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted);
-  cursor: pointer;
-}
-.auth-tab.is-active { background: var(--bg-panel); color: var(--ink); box-shadow: var(--shadow-card); }
 .auth-form { display: flex; flex-direction: column; gap: 10px; }
 .auth-form input {
   padding: 12px 14px;

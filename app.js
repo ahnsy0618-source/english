@@ -49,28 +49,15 @@
   const authPassword = document.getElementById("authPassword");
   const authSubmit = document.getElementById("authSubmit");
   const authMessage = document.getElementById("authMessage");
-  const authTabs = document.querySelectorAll(".auth-tab");
   const signOutBtn = document.getElementById("signOutBtn");
 
   let currentUser = null;
-  let authMode = "signin";
 
   function showAuthMessage(text, isSuccess) {
     authMessage.textContent = text;
     authMessage.hidden = false;
     authMessage.classList.toggle("is-success", !!isSuccess);
   }
-
-  authTabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      authTabs.forEach(t => t.classList.remove("is-active"));
-      tab.classList.add("is-active");
-      authMode = tab.dataset.mode;
-      authSubmit.textContent = authMode === "signin" ? "로그인" : "회원가입";
-      authPassword.autocomplete = authMode === "signin" ? "current-password" : "new-password";
-      authMessage.hidden = true;
-    });
-  });
 
   authForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -79,17 +66,8 @@
     const password = authPassword.value;
     authSubmit.disabled = true;
     try {
-      if (authMode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        if (!data.session) {
-          showAuthMessage("가입 완료! 이메일의 확인 링크를 클릭한 뒤 로그인해주세요.", true);
-          authTabs[0].click();
-        }
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (err) {
       showAuthMessage(err.message, false);
     } finally {
