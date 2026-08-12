@@ -63,7 +63,15 @@
       </div>
     </section>
 
-    <section class="panel panel--coral col-7" aria-label="오답노트">
+    <section class="panel panel--peach col-7" aria-label="복습 퀴즈">
+      <div class="panel__header">
+        <h2>🧠 복습 퀴즈</h2>
+        <span class="panel__badge" id="quizScore">0/0</span>
+      </div>
+      <div id="quizArea"></div>
+    </section>
+
+    <section class="panel panel--coral col-3" aria-label="오답노트">
       <div class="panel__header">
         <h2>📕 오답노트</h2>
         <span class="panel__badge" id="mistakeCount">0</span>
@@ -78,14 +86,6 @@
         <span class="pagination__label" id="mistakePageLabel"></span>
         <button type="button" class="pagination__btn" data-page-action="next" aria-label="다음 오답">›</button>
       </div>
-    </section>
-
-    <section class="panel panel--peach col-3" aria-label="복습 퀴즈">
-      <div class="panel__header">
-        <h2>🧠 복습 퀴즈</h2>
-        <span class="panel__badge" id="quizScore">0/0</span>
-      </div>
-      <div id="quizArea"></div>
     </section>
   </main>
 
