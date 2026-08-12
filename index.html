@@ -14,80 +14,103 @@
 <div class="app-root">
 <div class="page">
 
-  <header class="topbar">
-    <div class="topbar__badges">
-      <div class="date-badge">
-        <span class="date-badge__icon">📅</span>
-        <span id="todayDate"></span>
+  <section class="auth-screen" id="authScreen" hidden>
+    <div class="auth-card">
+      <p class="auth-card__logo">🗣️</p>
+      <h1 class="auth-card__title">하루 3문장 영어회화</h1>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab is-active" data-mode="signin">로그인</button>
+        <button type="button" class="auth-tab" data-mode="signup">회원가입</button>
       </div>
-      <button type="button" class="dday-badge" id="ddayBadge">
-        <span class="dday-badge__icon">🎯</span>
-        <span id="ddayText">오픽 시험일 설정</span>
-      </button>
-      <div class="dday-editor" id="ddayEditor" hidden>
-        <input type="date" id="examDateInput" class="dday-editor__input">
-        <button type="button" class="btn btn-primary btn-sm" id="examDateSave">저장</button>
-      </div>
+      <form id="authForm" class="auth-form">
+        <input type="email" id="authEmail" placeholder="이메일" required autocomplete="email">
+        <input type="password" id="authPassword" placeholder="비밀번호 (6자 이상)" required autocomplete="current-password" minlength="6">
+        <button type="submit" class="btn btn-primary" id="authSubmit">로그인</button>
+      </form>
+      <p class="auth-message" id="authMessage" hidden></p>
     </div>
-    <div class="topbar__row">
-      <h1 class="topbar__title">오늘의 <span>영어 3문장</span></h1>
-      <div class="streak-badge">
-        <span class="streak-badge__icon">🔥</span>
-        <span id="streakText"></span>
-      </div>
-    </div>
-  </header>
+  </section>
 
-  <main class="layout">
-    <section class="panel panel--pink col-5" aria-label="오늘의 영어 문장">
-      <div class="panel__header">
-        <h2>📖 오늘의 영어 문장</h2>
+  <div class="app-shell" id="appShell" hidden>
+    <header class="topbar">
+      <div class="topbar__badges">
+        <div class="date-badge">
+          <span class="date-badge__icon">📅</span>
+          <span id="todayDate"></span>
+        </div>
+        <button type="button" class="dday-badge" id="ddayBadge">
+          <span class="dday-badge__icon">🎯</span>
+          <span id="ddayText">오픽 시험일 설정</span>
+        </button>
+        <div class="dday-editor" id="ddayEditor" hidden>
+          <input type="date" id="examDateInput" class="dday-editor__input">
+          <button type="button" class="btn btn-primary btn-sm" id="examDateSave">저장</button>
+        </div>
+        <button type="button" class="dday-badge" id="signOutBtn">
+          <span class="dday-badge__icon">🚪</span>
+          <span>로그아웃</span>
+        </button>
       </div>
-      <ul class="card-list" id="todayList"></ul>
-    </section>
+      <div class="topbar__row">
+        <h1 class="topbar__title">오늘의 <span>영어 3문장</span></h1>
+        <div class="streak-badge">
+          <span class="streak-badge__icon">🔥</span>
+          <span id="streakText"></span>
+        </div>
+      </div>
+    </header>
 
-    <section class="panel panel--lavender col-5" aria-label="즐겨찾기한 문장">
-      <div class="panel__header">
-        <h2>⭐ 즐겨찾기한 문장</h2>
-        <span class="panel__badge" id="favoriteCount">0</span>
-      </div>
-      <ul class="card-list" id="favoriteList"></ul>
-      <p class="empty-state" id="favoriteEmpty" hidden>
-        <span class="empty-state__icon">☆</span>
-        아직 즐겨찾기한 문장이 없어요.
-      </p>
-      <div class="pagination" id="favoritePagination" hidden>
-        <button type="button" class="pagination__btn" data-page-action="prev" aria-label="이전 문장">‹</button>
-        <span class="pagination__label" id="favoritePageLabel"></span>
-        <button type="button" class="pagination__btn" data-page-action="next" aria-label="다음 문장">›</button>
-      </div>
-    </section>
+    <main class="layout">
+      <section class="panel panel--pink col-5" aria-label="오늘의 영어 문장">
+        <div class="panel__header">
+          <h2>📖 오늘의 영어 문장</h2>
+        </div>
+        <ul class="card-list" id="todayList"></ul>
+      </section>
 
-    <section class="panel panel--peach col-7" aria-label="복습 퀴즈">
-      <div class="panel__header">
-        <h2>🧠 복습 퀴즈</h2>
-        <span class="panel__badge" id="quizScore">0/0</span>
-      </div>
-      <div id="quizArea"></div>
-    </section>
+      <section class="panel panel--lavender col-5" aria-label="즐겨찾기한 문장">
+        <div class="panel__header">
+          <h2>⭐ 즐겨찾기한 문장</h2>
+          <span class="panel__badge" id="favoriteCount">0</span>
+        </div>
+        <ul class="card-list" id="favoriteList"></ul>
+        <p class="empty-state" id="favoriteEmpty" hidden>
+          <span class="empty-state__icon">☆</span>
+          아직 즐겨찾기한 문장이 없어요.
+        </p>
+        <div class="pagination" id="favoritePagination" hidden>
+          <button type="button" class="pagination__btn" data-page-action="prev" aria-label="이전 문장">‹</button>
+          <span class="pagination__label" id="favoritePageLabel"></span>
+          <button type="button" class="pagination__btn" data-page-action="next" aria-label="다음 문장">›</button>
+        </div>
+      </section>
 
-    <section class="panel panel--coral col-3" aria-label="오답노트">
-      <div class="panel__header">
-        <h2>📕 오답노트</h2>
-        <span class="panel__badge" id="mistakeCount">0</span>
-      </div>
-      <ul class="card-list" id="mistakeList"></ul>
-      <p class="empty-state" id="mistakeEmpty" hidden>
-        <span class="empty-state__icon">🎉</span>
-        아직 틀린 문장이 없어요. 퀴즈를 풀어보세요.
-      </p>
-      <div class="pagination" id="mistakePagination" hidden>
-        <button type="button" class="pagination__btn" data-page-action="prev" aria-label="이전 오답">‹</button>
-        <span class="pagination__label" id="mistakePageLabel"></span>
-        <button type="button" class="pagination__btn" data-page-action="next" aria-label="다음 오답">›</button>
-      </div>
-    </section>
-  </main>
+      <section class="panel panel--peach col-7" aria-label="복습 퀴즈">
+        <div class="panel__header">
+          <h2>🧠 복습 퀴즈</h2>
+          <span class="panel__badge" id="quizScore">0/0</span>
+        </div>
+        <div id="quizArea"></div>
+      </section>
+
+      <section class="panel panel--coral col-3" aria-label="오답노트">
+        <div class="panel__header">
+          <h2>📕 오답노트</h2>
+          <span class="panel__badge" id="mistakeCount">0</span>
+        </div>
+        <ul class="card-list" id="mistakeList"></ul>
+        <p class="empty-state" id="mistakeEmpty" hidden>
+          <span class="empty-state__icon">🎉</span>
+          아직 틀린 문장이 없어요. 퀴즈를 풀어보세요.
+        </p>
+        <div class="pagination" id="mistakePagination" hidden>
+          <button type="button" class="pagination__btn" data-page-action="prev" aria-label="이전 오답">‹</button>
+          <span class="pagination__label" id="mistakePageLabel"></span>
+          <button type="button" class="pagination__btn" data-page-action="next" aria-label="다음 오답">›</button>
+        </div>
+      </section>
+    </main>
+  </div>
 
 </div>
 </div>
