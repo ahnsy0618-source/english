@@ -48,10 +48,15 @@
   const favoriteCount = document.getElementById("favoriteCount");
   const streakText = document.getElementById("streakText");
   const todayDate = document.getElementById("todayDate");
+  const quizArea = document.getElementById("quizArea");
+  const quizScoreEl = document.getElementById("quizScore");
 
   let sentencePool = [];
   let todaySentences = [];
   let favoriteIds = new Set();
+  let quizSentence = null;
+  let quizRevealed = false;
+  let quizScore = { correct: 0, total: 0 };
 
   function createSentenceCardEl(sentence, index) {
     const li = document.createElement("li");
@@ -114,6 +119,97 @@
     favoriteCount.textContent = String(favSentences.length);
   }
 
+  // ---------- 복습 퀴즈 (즐겨찾기 재활용) ----------
+  function pickQuizSentence(favSentences) {
+    const candidates = quizSentence
+      ? favSentences.filter(s => s.id !== quizSentence.id)
+      : favSentences;
+    const pool = candidates.length > 0 ? candidates : favSentences;
+    quizSentence = pool[Math.floor(Math.random() * pool.length)];
+    quizRevealed = false;
+  }
+
+  function renderQuiz() {
+    const favSentences = sentencePool.filter(s => favoriteIds.has(s.id));
+    quizScoreEl.textContent = quizScore.correct + "/" + quizScore.total;
+    quizArea.innerHTML = "";
+
+    if (favSentences.length === 0) {
+      quizSentence = null;
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.innerHTML = '<span class="empty-state__icon">🧠</span>즐겨찾기한 문장이 있어야 퀴즈를 풀 수 있어요. 문장에 ★ 표시를 해보세요.';
+      quizArea.appendChild(empty);
+      return;
+    }
+
+    if (!quizSentence || !favoriteIds.has(quizSentence.id)) {
+      pickQuizSentence(favSentences);
+    }
+
+    const card = document.createElement("div");
+    card.className = "quiz-card";
+
+    const label = document.createElement("p");
+    label.className = "quiz-card__label";
+    label.textContent = "이 문장의 뜻은?";
+    card.appendChild(label);
+
+    const en = document.createElement("p");
+    en.className = "quiz-card__en";
+    en.textContent = quizSentence.en;
+    card.appendChild(en);
+
+    const actions = document.createElement("div");
+    actions.className = "quiz-actions";
+
+    if (!quizRevealed) {
+      const revealBtn = document.createElement("button");
+      revealBtn.type = "button";
+      revealBtn.className = "btn btn-primary";
+      revealBtn.dataset.action = "reveal";
+      revealBtn.textContent = "뜻 보기";
+      actions.appendChild(revealBtn);
+    } else {
+      const ko = document.createElement("p");
+      ko.className = "quiz-card__ko";
+      ko.textContent = quizSentence.ko || "(번역 없음)";
+      card.appendChild(ko);
+
+      const correctBtn = document.createElement("button");
+      correctBtn.type = "button";
+      correctBtn.className = "btn btn-correct";
+      correctBtn.dataset.action = "correct";
+      correctBtn.textContent = "맞았어요";
+      actions.appendChild(correctBtn);
+
+      const wrongBtn = document.createElement("button");
+      wrongBtn.type = "button";
+      wrongBtn.className = "btn btn-wrong";
+      wrongBtn.dataset.action = "wrong";
+      wrongBtn.textContent = "틀렸어요";
+      actions.appendChild(wrongBtn);
+    }
+
+    card.appendChild(actions);
+    quizArea.appendChild(card);
+  }
+
+  quizArea.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const favSentences = sentencePool.filter(s => favoriteIds.has(s.id));
+    if (btn.dataset.action === "reveal") {
+      quizRevealed = true;
+      renderQuiz();
+    } else if (btn.dataset.action === "correct" || btn.dataset.action === "wrong") {
+      quizScore.total += 1;
+      if (btn.dataset.action === "correct") quizScore.correct += 1;
+      pickQuizSentence(favSentences);
+      renderQuiz();
+    }
+  });
+
   async function toggleFavorite(id) {
     if (favoriteIds.has(id)) {
       const { error } = await supabase.from("favorites").delete().eq("sentence_id", id);
@@ -126,6 +222,7 @@
     }
     renderToday();
     renderFavorites();
+    renderQuiz();
   }
 
   todayList.addEventListener("click", (e) => {
@@ -185,5 +282,6 @@
     streakText.textContent = streak + "일째 연속 방문 중";
     renderToday();
     renderFavorites();
+    renderQuiz();
   });
 })();

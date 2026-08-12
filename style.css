@@ -13,6 +13,11 @@
   --star-on:        #f0a93a;
   --accent-pink:     #ff5c8d;
   --accent-lavender: #9d7ef2;
+  --accent-peach:    #ff9a5a;
+  --correct-bg:      #e7f7ec;
+  --correct-fg:      #1a7f3c;
+  --wrong-bg:        #fdeceb;
+  --wrong-fg:        #c23a2e;
   --shadow-card:    0 1px 2px rgba(32,26,18,0.04), 0 1px 1px rgba(32,26,18,0.03);
   --shadow-card-hover: 0 6px 16px rgba(32,26,18,0.08);
 
@@ -42,6 +47,11 @@
     --star-on:        #f3bd5a;
     --accent-pink:     #ff7ba4;
     --accent-lavender: #b39cf5;
+    --accent-peach:    #ffab73;
+    --correct-bg:      rgba(74,222,128,0.16);
+    --correct-fg:      #4ade80;
+    --wrong-bg:        rgba(248,113,113,0.16);
+    --wrong-fg:        #f87171;
     --shadow-card:    0 1px 2px rgba(0,0,0,0.2);
     --shadow-card-hover: 0 8px 20px rgba(0,0,0,0.32);
   }
@@ -133,10 +143,15 @@ html, body {
   min-width: 0;
   background: var(--bg-panel);
   border: 1px solid var(--border);
+  border-top: 3px solid transparent;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 26px 26px 22px;
 }
+.panel--pink     { border-top-color: var(--accent-pink); }
+.panel--lavender { border-top-color: var(--accent-lavender); }
+.panel--peach    { border-top-color: var(--accent-peach); }
+.panel--span     { grid-column: 1 / -1; }
 
 .panel__header {
   display: flex;
@@ -228,3 +243,33 @@ html, body {
   margin: 0;
 }
 .empty-state__icon { display: block; font-size: 28px; margin-bottom: 8px; }
+
+.quiz-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 30px 20px 20px;
+}
+.quiz-card__label { font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: var(--muted); }
+.quiz-card__en { font-size: 19px; font-weight: 700; line-height: 1.5; max-width: 560px; color: var(--ink); }
+.quiz-card__ko { font-size: 15px; color: var(--muted); max-width: 560px; }
+.quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+.btn {
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 11px 22px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover { opacity: 0.88; }
+.btn-correct { background: var(--correct-bg); color: var(--correct-fg); }
+.btn-wrong { background: var(--wrong-bg); color: var(--wrong-fg); }
