@@ -52,13 +52,26 @@
   const quizScoreEl = document.getElementById("quizScore");
   const favoritePagination = document.getElementById("favoritePagination");
   const favoritePageLabel = document.getElementById("favoritePageLabel");
+  const mistakeList = document.getElementById("mistakeList");
+  const mistakeEmpty = document.getElementById("mistakeEmpty");
+  const mistakeCount = document.getElementById("mistakeCount");
+  const mistakePagination = document.getElementById("mistakePagination");
+  const mistakePageLabel = document.getElementById("mistakePageLabel");
+  const ddayBadge = document.getElementById("ddayBadge");
+  const ddayText = document.getElementById("ddayText");
+  const ddayEditor = document.getElementById("ddayEditor");
+  const examDateInput = document.getElementById("examDateInput");
+  const examDateSave = document.getElementById("examDateSave");
 
-  const FAVORITES_PER_PAGE = 3;
+  const PAGE_SIZE = 3;
 
   let sentencePool = [];
   let todaySentences = [];
   let favoriteIds = new Set();
   let favoritePage = 0;
+  let mistakeIds = new Set();
+  let mistakePage = 0;
+  let examDate = null;
   let quizSentence = null;
   let quizRevealed = false;
   let quizScore = { correct: 0, total: 0 };
@@ -121,17 +134,17 @@
     favoriteEmpty.hidden = favSentences.length !== 0;
     favoriteCount.textContent = String(favSentences.length);
 
-    const totalPages = Math.max(1, Math.ceil(favSentences.length / FAVORITES_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(favSentences.length / PAGE_SIZE));
     if (favoritePage > totalPages - 1) favoritePage = totalPages - 1;
     if (favoritePage < 0) favoritePage = 0;
 
-    const start = favoritePage * FAVORITES_PER_PAGE;
-    const pageItems = favSentences.slice(start, start + FAVORITES_PER_PAGE);
+    const start = favoritePage * PAGE_SIZE;
+    const pageItems = favSentences.slice(start, start + PAGE_SIZE);
 
     favoriteList.innerHTML = "";
     pageItems.forEach(s => favoriteList.appendChild(createSentenceCardEl(s)));
 
-    favoritePagination.hidden = favSentences.length <= FAVORITES_PER_PAGE;
+    favoritePagination.hidden = favSentences.length <= PAGE_SIZE;
     favoritePageLabel.textContent = (favoritePage + 1) + " / " + totalPages;
     favoritePagination.querySelector('[data-page-action="prev"]').disabled = favoritePage === 0;
     favoritePagination.querySelector('[data-page-action="next"]').disabled = favoritePage >= totalPages - 1;
@@ -143,6 +156,54 @@
     favoritePage += btn.dataset.pageAction === "prev" ? -1 : 1;
     renderFavorites();
   });
+
+  // ---------- 오답노트 ----------
+  function renderMistakes() {
+    const mistakeSentences = sentencePool.filter(s => mistakeIds.has(s.id));
+    mistakeEmpty.hidden = mistakeSentences.length !== 0;
+    mistakeCount.textContent = String(mistakeSentences.length);
+
+    const totalPages = Math.max(1, Math.ceil(mistakeSentences.length / PAGE_SIZE));
+    if (mistakePage > totalPages - 1) mistakePage = totalPages - 1;
+    if (mistakePage < 0) mistakePage = 0;
+
+    const start = mistakePage * PAGE_SIZE;
+    const pageItems = mistakeSentences.slice(start, start + PAGE_SIZE);
+
+    mistakeList.innerHTML = "";
+    pageItems.forEach(s => mistakeList.appendChild(createSentenceCardEl(s)));
+
+    mistakePagination.hidden = mistakeSentences.length <= PAGE_SIZE;
+    mistakePageLabel.textContent = (mistakePage + 1) + " / " + totalPages;
+    mistakePagination.querySelector('[data-page-action="prev"]').disabled = mistakePage === 0;
+    mistakePagination.querySelector('[data-page-action="next"]').disabled = mistakePage >= totalPages - 1;
+  }
+
+  mistakePagination.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-page-action]");
+    if (!btn) return;
+    mistakePage += btn.dataset.pageAction === "prev" ? -1 : 1;
+    renderMistakes();
+  });
+
+  mistakeList.addEventListener("click", (e) => {
+    const btn = e.target.closest(".star-btn");
+    if (!btn) return;
+    toggleFavorite(btn.closest(".sentence-card").dataset.id);
+  });
+
+  async function recordQuizResult(sentenceId, isCorrect) {
+    if (isCorrect) {
+      const { error } = await supabase.from("mistakes").delete().eq("sentence_id", sentenceId);
+      if (error) { console.error("오답노트 제거 실패:", error.message); return; }
+      mistakeIds.delete(sentenceId);
+    } else {
+      const { error } = await supabase.from("mistakes").upsert({ sentence_id: sentenceId });
+      if (error) { console.error("오답노트 추가 실패:", error.message); return; }
+      mistakeIds.add(sentenceId);
+    }
+    renderMistakes();
+  }
 
   // ---------- 복습 퀴즈 (즐겨찾기 재활용, 한→영 작문 연습) ----------
   let quizUserAnswer = "";
@@ -287,6 +348,7 @@
       quizScore.total += 1;
       if (quizIsCorrect) quizScore.correct += 1;
       quizRevealed = true;
+      recordQuizResult(quizSentence.id, quizIsCorrect);
       renderQuiz();
     } else if (btn.dataset.action === "next") {
       pickQuizSentence(favSentences);
@@ -313,6 +375,7 @@
     }
     renderToday();
     renderFavorites();
+    renderMistakes();
     renderQuiz();
   }
 
@@ -350,6 +413,38 @@
     return count;
   }
 
+  // ---------- D-Day (Supabase) ----------
+  function renderDday(today) {
+    if (!examDate) {
+      ddayText.textContent = "오픽 시험일 설정";
+      return;
+    }
+    const diffDays = Math.round(
+      (new Date(examDate + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000
+    );
+    if (diffDays > 0) ddayText.textContent = "D-" + diffDays;
+    else if (diffDays === 0) ddayText.textContent = "D-DAY";
+    else ddayText.textContent = "D+" + Math.abs(diffDays);
+  }
+
+  ddayBadge.addEventListener("click", () => {
+    examDateInput.value = examDate || "";
+    ddayBadge.hidden = true;
+    ddayEditor.hidden = false;
+    examDateInput.focus();
+  });
+
+  examDateSave.addEventListener("click", async () => {
+    const value = examDateInput.value;
+    if (!value) return;
+    const { error } = await supabase.from("settings").update({ exam_date: value }).eq("id", 1);
+    if (error) { console.error("시험일 저장 실패:", error.message); return; }
+    examDate = value;
+    ddayEditor.hidden = true;
+    ddayBadge.hidden = false;
+    renderDday(getTodayDateString());
+  });
+
   // ---------- init ----------
   document.addEventListener("DOMContentLoaded", async () => {
     const today = getTodayDateString();
@@ -357,22 +452,36 @@
       year: "numeric", month: "long", day: "numeric", weekday: "long"
     });
 
-    const [{ data: sentences, error: sentencesError }, { data: favorites, error: favoritesError }, streak] = await Promise.all([
+    const [
+      { data: sentences, error: sentencesError },
+      { data: favorites, error: favoritesError },
+      { data: mistakes, error: mistakesError },
+      { data: settings, error: settingsError },
+      streak
+    ] = await Promise.all([
       supabase.from("sentences").select("*").order("created_at", { ascending: true }),
       supabase.from("favorites").select("sentence_id"),
+      supabase.from("mistakes").select("sentence_id"),
+      supabase.from("settings").select("exam_date").eq("id", 1).single(),
       updateStreak(today)
     ]);
 
     if (sentencesError) console.error("문장 불러오기 실패:", sentencesError.message);
     if (favoritesError) console.error("즐겨찾기 불러오기 실패:", favoritesError.message);
+    if (mistakesError) console.error("오답노트 불러오기 실패:", mistakesError.message);
+    if (settingsError) console.error("설정 불러오기 실패:", settingsError.message);
 
     sentencePool = sentences || [];
     favoriteIds = new Set((favorites || []).map(f => f.sentence_id));
+    mistakeIds = new Set((mistakes || []).map(m => m.sentence_id));
+    examDate = settings ? settings.exam_date : null;
     todaySentences = pickTodaySentences(today, sentencePool);
 
     streakText.textContent = streak + "일째 연속 방문 중";
+    renderDday(today);
     renderToday();
     renderFavorites();
+    renderMistakes();
     renderQuiz();
   });
 })();

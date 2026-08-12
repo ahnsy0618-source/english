@@ -1,3 +1,5 @@
+[hidden] { display: none !important; }
+
 .app-root {
   color-scheme: light;
   --bg-page:        #fbf3e7;
@@ -14,6 +16,7 @@
   --accent-pink:     #ff5c8d;
   --accent-lavender: #9d7ef2;
   --accent-peach:    #ff9a5a;
+  --accent-coral:    #e5484d;
   --correct-fg:      #1a7f3c;
   --wrong-fg:        #c23a2e;
   --shadow-card:    0 1px 2px rgba(32,26,18,0.04), 0 1px 1px rgba(32,26,18,0.03);
@@ -64,6 +67,44 @@ html, body {
   color: var(--body);
 }
 .date-badge__icon { font-size: 14px; }
+.topbar__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dday-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-item);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px 6px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--body);
+  cursor: pointer;
+  font-family: inherit;
+}
+.dday-badge:hover { background: var(--bg-panel); box-shadow: var(--shadow-card); }
+.dday-badge__icon { font-size: 14px; }
+.dday-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.dday-editor__input {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-item);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+}
+.btn-sm { padding: 6px 14px; font-size: 13px; }
 .topbar__row {
   display: flex;
   flex-wrap: wrap;
@@ -103,13 +144,17 @@ html, body {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   gap: var(--space-lg);
   align-items: start;
 }
 .layout > * { min-width: 0; }
+.col-5 { grid-column: span 5; }
+.col-7 { grid-column: span 7; }
+.col-3 { grid-column: span 3; }
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
+  .col-5, .col-7, .col-3 { grid-column: 1 / -1; }
 }
 
 .panel {
@@ -124,7 +169,7 @@ html, body {
 .panel--pink     { border-top-color: var(--accent-pink); }
 .panel--lavender { border-top-color: var(--accent-lavender); }
 .panel--peach    { border-top-color: var(--accent-peach); }
-.panel--span     { grid-column: 1 / -1; }
+.panel--coral    { border-top-color: var(--accent-coral); }
 
 .panel__header {
   display: flex;
