@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하루 3문장 영어회화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-root">
+<div class="page">
+
+  <header class="topbar">
+    <p class="topbar__date" id="todayDate"></p>
+    <h1 class="topbar__streak" id="streakText"></h1>
+  </header>
+
+  <main class="layout">
+    <section class="panel panel--pink" aria-label="오늘의 영어 문장">
+      <div class="panel__header">
+        <h2>오늘의 영어 문장</h2>
+      </div>
+      <ul class="card-list" id="todayList"></ul>
+    </section>
+
+    <section class="panel panel--lavender" aria-label="즐겨찾기한 문장">
+      <div class="panel__header">
+        <h2>즐겨찾기한 문장</h2>
+        <span class="panel__badge" id="favoriteCount">0</span>
+      </div>
+      <ul class="card-list" id="favoriteList"></ul>
+      <p class="empty-state" id="favoriteEmpty" hidden>아직 즐겨찾기한 문장이 없어요.</p>
+    </section>
+  </main>
+
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
