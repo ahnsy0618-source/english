@@ -50,10 +50,15 @@
   const todayDate = document.getElementById("todayDate");
   const quizArea = document.getElementById("quizArea");
   const quizScoreEl = document.getElementById("quizScore");
+  const favoritePagination = document.getElementById("favoritePagination");
+  const favoritePageLabel = document.getElementById("favoritePageLabel");
+
+  const FAVORITES_PER_PAGE = 3;
 
   let sentencePool = [];
   let todaySentences = [];
   let favoriteIds = new Set();
+  let favoritePage = 0;
   let quizSentence = null;
   let quizRevealed = false;
   let quizScore = { correct: 0, total: 0 };
@@ -112,12 +117,32 @@
   }
 
   function renderFavorites() {
-    favoriteList.innerHTML = "";
     const favSentences = sentencePool.filter(s => favoriteIds.has(s.id));
-    favSentences.forEach(s => favoriteList.appendChild(createSentenceCardEl(s)));
     favoriteEmpty.hidden = favSentences.length !== 0;
     favoriteCount.textContent = String(favSentences.length);
+
+    const totalPages = Math.max(1, Math.ceil(favSentences.length / FAVORITES_PER_PAGE));
+    if (favoritePage > totalPages - 1) favoritePage = totalPages - 1;
+    if (favoritePage < 0) favoritePage = 0;
+
+    const start = favoritePage * FAVORITES_PER_PAGE;
+    const pageItems = favSentences.slice(start, start + FAVORITES_PER_PAGE);
+
+    favoriteList.innerHTML = "";
+    pageItems.forEach(s => favoriteList.appendChild(createSentenceCardEl(s)));
+
+    favoritePagination.hidden = favSentences.length <= FAVORITES_PER_PAGE;
+    favoritePageLabel.textContent = (favoritePage + 1) + " / " + totalPages;
+    favoritePagination.querySelector('[data-page-action="prev"]').disabled = favoritePage === 0;
+    favoritePagination.querySelector('[data-page-action="next"]').disabled = favoritePage >= totalPages - 1;
   }
+
+  favoritePagination.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-page-action]");
+    if (!btn) return;
+    favoritePage += btn.dataset.pageAction === "prev" ? -1 : 1;
+    renderFavorites();
+  });
 
   // ---------- 복습 퀴즈 (즐겨찾기 재활용, 한→영 작문 연습) ----------
   let quizUserAnswer = "";
