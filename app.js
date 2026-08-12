@@ -41,44 +41,6 @@
     return picked;
   }
 
-  // ---------- 인증 ----------
-  const authScreen = document.getElementById("authScreen");
-  const appShell = document.getElementById("appShell");
-  const authForm = document.getElementById("authForm");
-  const authEmail = document.getElementById("authEmail");
-  const authPassword = document.getElementById("authPassword");
-  const authSubmit = document.getElementById("authSubmit");
-  const authMessage = document.getElementById("authMessage");
-  const signOutBtn = document.getElementById("signOutBtn");
-
-  let currentUser = null;
-
-  function showAuthMessage(text, isSuccess) {
-    authMessage.textContent = text;
-    authMessage.hidden = false;
-    authMessage.classList.toggle("is-success", !!isSuccess);
-  }
-
-  authForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    authMessage.hidden = true;
-    const email = authEmail.value.trim();
-    const password = authPassword.value;
-    authSubmit.disabled = true;
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    } catch (err) {
-      showAuthMessage(err.message, false);
-    } finally {
-      authSubmit.disabled = false;
-    }
-  });
-
-  signOutBtn.addEventListener("click", async () => {
-    await supabase.auth.signOut();
-  });
-
   // ---------- 렌더링 대상 ----------
   const todayList = document.getElementById("todayList");
   const favoriteList = document.getElementById("favoriteList");
@@ -231,13 +193,12 @@
   });
 
   async function recordQuizResult(sentenceId, isCorrect) {
-    if (!currentUser) return;
     if (isCorrect) {
       const { error } = await supabase.from("mistakes").delete().eq("sentence_id", sentenceId);
       if (error) { console.error("오답노트 제거 실패:", error.message); return; }
       mistakeIds.delete(sentenceId);
     } else {
-      const { error } = await supabase.from("mistakes").upsert({ sentence_id: sentenceId, user_id: currentUser.id });
+      const { error } = await supabase.from("mistakes").upsert({ sentence_id: sentenceId });
       if (error) { console.error("오답노트 추가 실패:", error.message); return; }
       mistakeIds.add(sentenceId);
     }
@@ -403,13 +364,12 @@
   });
 
   async function toggleFavorite(id) {
-    if (!currentUser) return;
     if (favoriteIds.has(id)) {
       const { error } = await supabase.from("favorites").delete().eq("sentence_id", id);
       if (error) { console.error("즐겨찾기 해제 실패:", error.message); return; }
       favoriteIds.delete(id);
     } else {
-      const { error } = await supabase.from("favorites").insert({ sentence_id: id, user_id: currentUser.id });
+      const { error } = await supabase.from("favorites").insert({ sentence_id: id });
       if (error) { console.error("즐겨찾기 추가 실패:", error.message); return; }
       favoriteIds.add(id);
     }
@@ -431,26 +391,25 @@
   });
 
   // ---------- 연속 방문일 (Supabase) ----------
-  async function updateStreak(today, userId) {
-    const { data, error } = await supabase.from("streak").select("*").eq("user_id", userId).maybeSingle();
+  async function updateStreak(today) {
+    const { data, error } = await supabase.from("streak").select("*").eq("id", 1).single();
     if (error) {
       console.error("연속 방문일 조회 실패:", error.message);
       return 0;
     }
-    let count;
-    if (!data) {
-      count = 1;
-    } else if (data.last_visit === today) {
-      count = data.count;
+    let count = data.count;
+    if (data.last_visit === today) {
+      // 오늘 이미 방문함 - 변경 없음
     } else if (data.last_visit === addDays(today, -1)) {
-      count = data.count + 1;
+      count += 1;
     } else {
       count = 1;
     }
-    const { error: upsertError } = await supabase
+    const { error: updateError } = await supabase
       .from("streak")
-      .upsert({ user_id: userId, count, last_visit: today });
-    if (upsertError) console.error("연속 방문일 갱신 실패:", upsertError.message);
+      .update({ count, last_visit: today })
+      .eq("id", 1);
+    if (updateError) console.error("연속 방문일 갱신 실패:", updateError.message);
     return count;
   }
 
@@ -476,10 +435,9 @@
   });
 
   examDateSave.addEventListener("click", async () => {
-    if (!currentUser) return;
     const value = examDateInput.value;
     if (!value) return;
-    const { error } = await supabase.from("settings").upsert({ user_id: currentUser.id, exam_date: value });
+    const { error } = await supabase.from("settings").update({ exam_date: value }).eq("id", 1);
     if (error) { console.error("시험일 저장 실패:", error.message); return; }
     examDate = value;
     ddayEditor.hidden = true;
@@ -487,8 +445,8 @@
     renderDday(getTodayDateString());
   });
 
-  // ---------- 앱 로드 (로그인 이후) ----------
-  async function loadApp(user) {
+  // ---------- init ----------
+  document.addEventListener("DOMContentLoaded", async () => {
     const today = getTodayDateString();
     todayDate.textContent = new Date().toLocaleDateString("ko-KR", {
       year: "numeric", month: "long", day: "numeric", weekday: "long"
@@ -504,8 +462,8 @@
       supabase.from("sentences").select("*").order("created_at", { ascending: true }),
       supabase.from("favorites").select("sentence_id"),
       supabase.from("mistakes").select("sentence_id"),
-      supabase.from("settings").select("exam_date").eq("user_id", user.id).maybeSingle(),
-      updateStreak(today, user.id)
+      supabase.from("settings").select("exam_date").eq("id", 1).single(),
+      updateStreak(today)
     ]);
 
     if (sentencesError) console.error("문장 불러오기 실패:", sentencesError.message);
@@ -518,11 +476,6 @@
     mistakeIds = new Set((mistakes || []).map(m => m.sentence_id));
     examDate = settings ? settings.exam_date : null;
     todaySentences = pickTodaySentences(today, sentencePool);
-    favoritePage = 0;
-    mistakePage = 0;
-    quizSentence = null;
-    quizRevealed = false;
-    quizScore = { correct: 0, total: 0 };
 
     streakText.textContent = streak + "일째 연속 방문 중";
     renderDday(today);
@@ -530,20 +483,5 @@
     renderFavorites();
     renderMistakes();
     renderQuiz();
-  }
-
-  // ---------- init ----------
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (session && session.user) {
-      currentUser = session.user;
-      authScreen.hidden = true;
-      appShell.hidden = false;
-      loadApp(currentUser);
-    } else {
-      currentUser = null;
-      appShell.hidden = true;
-      authScreen.hidden = false;
-      authForm.reset();
-    }
   });
 })();
