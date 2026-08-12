@@ -29,29 +29,6 @@
   --space-md: 16px;
   --space-lg: 28px;
 }
-@media (prefers-color-scheme: dark) {
-  .app-root {
-    color-scheme: dark;
-    --bg-page:        #14201e;
-    --bg-panel:       #1c2c29;
-    --bg-item:        #223530;
-    --border:         rgba(255,255,255,0.08);
-    --ink:            #f6f4ee;
-    --body:           #d9e6e3;
-    --muted:          #93a39d;
-    --muted-soft:     #5f716b;
-    --primary:        #f6f4ee;
-    --on-primary:     #14201e;
-    --star-on:        #f3bd5a;
-    --accent-pink:     #ff7ba4;
-    --accent-lavender: #b39cf5;
-    --accent-peach:    #ffab73;
-    --correct-fg:      #4ade80;
-    --wrong-fg:        #f87171;
-    --shadow-card:    0 1px 2px rgba(0,0,0,0.2);
-    --shadow-card-hover: 0 8px 20px rgba(0,0,0,0.32);
-  }
-}
 
 * { box-sizing: border-box; }
 html, body {
