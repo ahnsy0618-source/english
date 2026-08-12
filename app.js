@@ -146,6 +146,44 @@
 
   // ---------- 복습 퀴즈 (즐겨찾기 재활용, 한→영 작문 연습) ----------
   let quizUserAnswer = "";
+  let quizIsCorrect = false;
+  const QUIZ_MATCH_THRESHOLD = 0.8;
+
+  function normalizeAnswer(s) {
+    return s
+      .toLowerCase()
+      .replace(/[.,!?;:"']/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function levenshteinDistance(a, b) {
+    const rows = a.length + 1;
+    const cols = b.length + 1;
+    const dist = Array.from({ length: rows }, (_, i) => [i, ...new Array(cols - 1).fill(0)]);
+    for (let j = 0; j < cols; j++) dist[0][j] = j;
+    for (let i = 1; i < rows; i++) {
+      for (let j = 1; j < cols; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        dist[i][j] = Math.min(
+          dist[i - 1][j] + 1,
+          dist[i][j - 1] + 1,
+          dist[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return dist[rows - 1][cols - 1];
+  }
+
+  function isCloseEnough(userAnswer, correctAnswer) {
+    const a = normalizeAnswer(userAnswer);
+    const b = normalizeAnswer(correctAnswer);
+    if (!a) return false;
+    if (a === b) return true;
+    const maxLen = Math.max(a.length, b.length);
+    const similarity = 1 - levenshteinDistance(a, b) / maxLen;
+    return similarity >= QUIZ_MATCH_THRESHOLD;
+  }
 
   function pickQuizSentence(favSentences) {
     const candidates = quizSentence
@@ -206,6 +244,11 @@
       revealBtn.textContent = "정답 확인";
       actions.appendChild(revealBtn);
     } else {
+      const verdict = document.createElement("p");
+      verdict.className = "quiz-verdict " + (quizIsCorrect ? "quiz-verdict--correct" : "quiz-verdict--wrong");
+      verdict.textContent = quizIsCorrect ? "✅ 정답이에요!" : "❌ 아쉬워요, 다시 도전해봐요";
+      card.appendChild(verdict);
+
       if (quizUserAnswer) {
         const userAnswer = document.createElement("p");
         userAnswer.className = "quiz-user-answer";
@@ -219,19 +262,12 @@
       answer.textContent = quizSentence.en;
       card.appendChild(answer);
 
-      const correctBtn = document.createElement("button");
-      correctBtn.type = "button";
-      correctBtn.className = "btn btn-correct";
-      correctBtn.dataset.action = "correct";
-      correctBtn.textContent = "맞았어요";
-      actions.appendChild(correctBtn);
-
-      const wrongBtn = document.createElement("button");
-      wrongBtn.type = "button";
-      wrongBtn.className = "btn btn-wrong";
-      wrongBtn.dataset.action = "wrong";
-      wrongBtn.textContent = "틀렸어요";
-      actions.appendChild(wrongBtn);
+      const nextBtn = document.createElement("button");
+      nextBtn.type = "button";
+      nextBtn.className = "btn btn-primary";
+      nextBtn.dataset.action = "next";
+      nextBtn.textContent = "다음 문제";
+      actions.appendChild(nextBtn);
     }
 
     card.appendChild(actions);
@@ -247,11 +283,12 @@
     if (btn.dataset.action === "reveal") {
       const input = quizArea.querySelector(".quiz-input");
       quizUserAnswer = input ? input.value.trim() : "";
+      quizIsCorrect = isCloseEnough(quizUserAnswer, quizSentence.en);
+      quizScore.total += 1;
+      if (quizIsCorrect) quizScore.correct += 1;
       quizRevealed = true;
       renderQuiz();
-    } else if (btn.dataset.action === "correct" || btn.dataset.action === "wrong") {
-      quizScore.total += 1;
-      if (btn.dataset.action === "correct") quizScore.correct += 1;
+    } else if (btn.dataset.action === "next") {
       pickQuizSentence(favSentences);
       renderQuiz();
     }
