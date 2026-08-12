@@ -72,6 +72,13 @@
     en.appendChild(document.createTextNode(sentence.en));
     body.appendChild(en);
 
+    if (sentence.ko) {
+      const ko = document.createElement("span");
+      ko.className = "sentence-card__ko";
+      ko.textContent = sentence.ko;
+      body.appendChild(ko);
+    }
+
     const source = document.createElement("span");
     source.className = "sentence-card__source";
     const link = document.createElement("a");

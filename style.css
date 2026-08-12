@@ -63,19 +63,30 @@ html, body {
 .topbar {
   margin-bottom: 36px;
   display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.date-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-item);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: var(--body);
+}
+.date-badge__icon { font-size: 14px; }
+.topbar__row {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-}
-.topbar__date {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin: 0 0 10px;
-  width: 100%;
 }
 .topbar__title {
   font-size: 30px;
@@ -188,6 +199,7 @@ html, body {
   margin-right: 8px;
 }
 .sentence-card__en { font-size: 15.5px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.sentence-card__ko { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
 .sentence-card__source { font-size: 12px; }
 .sentence-card__source a { color: var(--muted); text-decoration: none; border-bottom: 1px dashed var(--muted-soft); }
 .sentence-card__source a:hover { color: var(--ink); border-bottom-color: var(--ink); }
