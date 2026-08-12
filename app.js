@@ -53,7 +53,7 @@
   let todaySentences = [];
   let favoriteIds = new Set();
 
-  function createSentenceCardEl(sentence) {
+  function createSentenceCardEl(sentence, index) {
     const li = document.createElement("li");
     li.className = "sentence-card";
     li.dataset.id = sentence.id;
@@ -63,7 +63,13 @@
 
     const en = document.createElement("span");
     en.className = "sentence-card__en";
-    en.textContent = sentence.en;
+    if (typeof index === "number") {
+      const badge = document.createElement("span");
+      badge.className = "sentence-card__index";
+      badge.textContent = String(index + 1);
+      en.appendChild(badge);
+    }
+    en.appendChild(document.createTextNode(sentence.en));
     body.appendChild(en);
 
     const source = document.createElement("span");
@@ -90,7 +96,7 @@
 
   function renderToday() {
     todayList.innerHTML = "";
-    todaySentences.forEach(s => todayList.appendChild(createSentenceCardEl(s)));
+    todaySentences.forEach((s, i) => todayList.appendChild(createSentenceCardEl(s, i)));
   }
 
   function renderFavorites() {
@@ -169,7 +175,7 @@
     favoriteIds = new Set((favorites || []).map(f => f.sentence_id));
     todaySentences = pickTodaySentences(today, sentencePool);
 
-    streakText.textContent = streak + "일째 연속 방문 중 🔥";
+    streakText.textContent = streak + "일째 연속 방문 중";
     renderToday();
     renderFavorites();
   });

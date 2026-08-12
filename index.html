@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>하루 3문장 영어회화</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,24 +16,31 @@
 
   <header class="topbar">
     <p class="topbar__date" id="todayDate"></p>
-    <h1 class="topbar__streak" id="streakText"></h1>
+    <h1 class="topbar__title">오늘의 <span>영어 3문장</span></h1>
+    <div class="streak-badge">
+      <span class="streak-badge__icon">🔥</span>
+      <span id="streakText"></span>
+    </div>
   </header>
 
   <main class="layout">
     <section class="panel panel--pink" aria-label="오늘의 영어 문장">
       <div class="panel__header">
-        <h2>오늘의 영어 문장</h2>
+        <h2>📖 오늘의 영어 문장</h2>
       </div>
       <ul class="card-list" id="todayList"></ul>
     </section>
 
     <section class="panel panel--lavender" aria-label="즐겨찾기한 문장">
       <div class="panel__header">
-        <h2>즐겨찾기한 문장</h2>
+        <h2>⭐ 즐겨찾기한 문장</h2>
         <span class="panel__badge" id="favoriteCount">0</span>
       </div>
       <ul class="card-list" id="favoriteList"></ul>
-      <p class="empty-state" id="favoriteEmpty" hidden>아직 즐겨찾기한 문장이 없어요.</p>
+      <p class="empty-state" id="favoriteEmpty" hidden>
+        <span class="empty-state__icon">☆</span>
+        아직 즐겨찾기한 문장이 없어요.
+      </p>
     </section>
   </main>
 
