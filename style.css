@@ -253,8 +253,23 @@ html, body {
   padding: 30px 20px 20px;
 }
 .quiz-card__label { font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: var(--muted); }
-.quiz-card__en { font-size: 19px; font-weight: 700; line-height: 1.5; max-width: 560px; color: var(--ink); }
-.quiz-card__ko { font-size: 15px; color: var(--muted); max-width: 560px; }
+.quiz-card__prompt { font-size: 19px; font-weight: 700; line-height: 1.5; max-width: 560px; color: var(--ink); }
+.quiz-card__answer { font-size: 15px; color: var(--ink); font-weight: 600; max-width: 560px; }
+.quiz-user-answer { font-size: 13.5px; color: var(--muted); max-width: 560px; }
+.quiz-user-answer em { color: var(--body); font-style: normal; font-weight: 600; }
+.quiz-input {
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-item);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+}
+.quiz-input::placeholder { color: var(--muted-soft); }
+.quiz-input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 .quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
 .btn {

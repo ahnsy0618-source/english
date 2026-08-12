@@ -119,7 +119,9 @@
     favoriteCount.textContent = String(favSentences.length);
   }
 
-  // ---------- 복습 퀴즈 (즐겨찾기 재활용) ----------
+  // ---------- 복습 퀴즈 (즐겨찾기 재활용, 한→영 작문 연습) ----------
+  let quizUserAnswer = "";
+
   function pickQuizSentence(favSentences) {
     const candidates = quizSentence
       ? favSentences.filter(s => s.id !== quizSentence.id)
@@ -127,6 +129,7 @@
     const pool = candidates.length > 0 ? candidates : favSentences;
     quizSentence = pool[Math.floor(Math.random() * pool.length)];
     quizRevealed = false;
+    quizUserAnswer = "";
   }
 
   function renderQuiz() {
@@ -152,29 +155,44 @@
 
     const label = document.createElement("p");
     label.className = "quiz-card__label";
-    label.textContent = "이 문장의 뜻은?";
+    label.textContent = "이 문장을 영어로 말해보세요";
     card.appendChild(label);
 
-    const en = document.createElement("p");
-    en.className = "quiz-card__en";
-    en.textContent = quizSentence.en;
-    card.appendChild(en);
+    const prompt = document.createElement("p");
+    prompt.className = "quiz-card__prompt";
+    prompt.textContent = quizSentence.ko || "(번역 없음)";
+    card.appendChild(prompt);
 
     const actions = document.createElement("div");
     actions.className = "quiz-actions";
 
     if (!quizRevealed) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "quiz-input";
+      input.placeholder = "영어로 입력해보세요";
+      input.autocomplete = "off";
+      card.appendChild(input);
+
       const revealBtn = document.createElement("button");
       revealBtn.type = "button";
       revealBtn.className = "btn btn-primary";
       revealBtn.dataset.action = "reveal";
-      revealBtn.textContent = "뜻 보기";
+      revealBtn.textContent = "정답 확인";
       actions.appendChild(revealBtn);
     } else {
-      const ko = document.createElement("p");
-      ko.className = "quiz-card__ko";
-      ko.textContent = quizSentence.ko || "(번역 없음)";
-      card.appendChild(ko);
+      if (quizUserAnswer) {
+        const userAnswer = document.createElement("p");
+        userAnswer.className = "quiz-user-answer";
+        userAnswer.innerHTML = '내가 쓴 문장: <em></em>';
+        userAnswer.querySelector("em").textContent = quizUserAnswer;
+        card.appendChild(userAnswer);
+      }
+
+      const answer = document.createElement("p");
+      answer.className = "quiz-card__answer";
+      answer.textContent = quizSentence.en;
+      card.appendChild(answer);
 
       const correctBtn = document.createElement("button");
       correctBtn.type = "button";
@@ -193,6 +211,8 @@
 
     card.appendChild(actions);
     quizArea.appendChild(card);
+
+    if (!quizRevealed) card.querySelector(".quiz-input").focus();
   }
 
   quizArea.addEventListener("click", (e) => {
@@ -200,6 +220,8 @@
     if (!btn) return;
     const favSentences = sentencePool.filter(s => favoriteIds.has(s.id));
     if (btn.dataset.action === "reveal") {
+      const input = quizArea.querySelector(".quiz-input");
+      quizUserAnswer = input ? input.value.trim() : "";
       quizRevealed = true;
       renderQuiz();
     } else if (btn.dataset.action === "correct" || btn.dataset.action === "wrong") {
@@ -207,6 +229,13 @@
       if (btn.dataset.action === "correct") quizScore.correct += 1;
       pickQuizSentence(favSentences);
       renderQuiz();
+    }
+  });
+  quizArea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.classList.contains("quiz-input")) {
+      e.preventDefault();
+      const revealBtn = quizArea.querySelector('button[data-action="reveal"]');
+      if (revealBtn) revealBtn.click();
     }
   });
 
